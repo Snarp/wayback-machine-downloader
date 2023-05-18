@@ -12,6 +12,8 @@
 
 - Ruby 3 compatibility.
 
+- `ArchiveApi` uses nested arrays instead of hashes for params?
+
 - Logging:
 
     * Currently uses `puts` only; switch to `Logger`/`SemanticLogger`/something

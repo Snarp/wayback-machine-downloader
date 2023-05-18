@@ -42,8 +42,8 @@ It will download the last version of every file present on Wayback Machine to `.
 	    -x, --exclude EXCLUDE_FILTER     Skip downloading of urls that match this filter
 					     (use // notation for the filter to be treated as a regex)
 	    -a, --all                        Expand downloading to error files (40x and 50x) and redirections (30x)
-	    -c, --concurrency NUMBER         Number of multiple files to download at a time
-					     Default is one file at a time (ie. 20)
+	    -c, --concurrency NUMBER         Number of files to download at a time (ie. 20)
+					     Default is one file at a time
 	    -p, --maximum-snapshot NUMBER    Maximum snapshot pages to consider (Default is 100)
 					     Count an average of 150,000 snapshots per page
 	    -l, --list                       Only list file urls in a JSON format with the archived timestamps, won't download anything

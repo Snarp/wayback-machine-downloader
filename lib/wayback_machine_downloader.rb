@@ -19,18 +19,18 @@ class WaybackMachineDownloader
     :from_timestamp, :to_timestamp, :only_filter, :exclude_filter, 
     :all, :maximum_pages, :threads_count
 
-  # @param [String]          base_url:       nil
-  # @param [TrueClass]       exact_url:      false
-  # @param [String]          directory:      nil
-  # @param [TrueClass]       all_timestamps: false
-  # @param [String,Numeric]  from_timestamp: nil
-  # @param [String,Numeric]  to_timestamp:   nil
-  # @param [String]          only_filter:    nil
-  # @param [String]          exclude_filter: nil
-  # @param [TrueClass]       all:            false
-  # @param [Integer]         maximum_pages:  100
-  # @param [Integer]         threads_count:  1
-  # @param [TrueClass]       list:           false
+  # @param [String]          base_url:       nil     Base url of the website you want to retrieve as a parameter (e.g., `http://example.com`)
+  # @param [TrueClass]       exact_url:      false   Download only the url provided and not the full site
+  # @param [String]          directory:      nil     Directory to save the downloaded files into. Default is `./websites/` plus the domain name
+  # @param [TrueClass]       all_timestamps: false   Download all snapshots/timestamps for a given website
+  # @param [String,Numeric]  from_timestamp: nil     Only files on or after timestamp supplied (ie. 20060716231334)
+  # @param [String,Numeric]  to_timestamp:   nil     Only files on or before timestamp supplied (ie. 20100916231334)
+  # @param [String,Regex]    only_filter:    nil     Restrict downloading to urls that include given string/match given regex
+  # @param [String]          exclude_filter: nil     Skip urls that include given string/match given regex
+  # @param [TrueClass]       all:            false   Expand downloading to error files (40x and 50x) and redirections (30x)
+  # @param [Integer]         maximum_pages:  100     Maximum snapshot pages to consider
+  # @param [Integer]         threads_count:  1       Number of files to download at a time (ie. 20)
+  # @param [TrueClass]       list:           false   Only list file urls in a JSON format with the archived timestamps, won't download anything
   # @param [Hash]            **ignored_args
   def initialize(base_url:       nil, 
                  exact_url:      false, 
