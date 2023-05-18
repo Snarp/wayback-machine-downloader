@@ -6,13 +6,12 @@ require 'open-uri'
 require 'fileutils'
 require 'cgi'
 require 'json'
-require_relative 'wayback_machine_downloader/tidy_bytes'
-require_relative 'wayback_machine_downloader/to_regex'
+require_relative 'core_ext/string'
 require_relative 'wayback_machine_downloader/archive_api'
 
 class WaybackMachineDownloader
 
-  include ArchiveAPI
+  include ArchiveApi
 
   VERSION = "2.3.2"
 

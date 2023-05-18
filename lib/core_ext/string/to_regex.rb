@@ -75,7 +75,3 @@ module ToRegex
     end
   end
 end
-
-class String
-  include ToRegex::StringMixin
-end

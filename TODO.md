@@ -1,5 +1,7 @@
 # TODO (SNARP'S)
 
+- References to local directory structure need to use `File.join` rather than string concatenation.
+
 - Yardoc documentation.
 
 - Restructure main class for readability.
@@ -12,7 +14,7 @@
 
 - Logging:
 
-    * Currently uses 'puts' only; switch to `Logger`/`SemanticLogger`/something
+    * Currently uses `puts` only; switch to `Logger`/`SemanticLogger`/something
 
     * Add ability to write log to file.
 
@@ -26,19 +28,11 @@
 
     * Option for extension/filetype-specific filtering?
 
-- Helper module structure:
-
-    * `ToRegex` and `TidyBytes` should be probably moved to a `core_ext` dir or similar to make it clearer that monkeypatching is happening.
-
-    * `ArchiveAPI` directory structure conflicts with internal structure.
-
-    * `TidyBytes` is referred to internally as `TibyBytes`.
-
-    * `ArchiveAPI` capitalization?
-
 - Testing:
   
     * Travis not being run; URLs etc out-of-date.
+
+    * Test suite does not display progress clearly; needs to say what it's doing when it's doing it.
 
     * Test suite is too rigid, fails out-of-the-box:
 
@@ -100,4 +94,14 @@
         (See full trace by running task with --trace)
         ```
 
-    
+## DONE
+
+- Helper module structure:
+
+    * __DONE__ `ToRegex` and `TidyBytes` should be probably moved to a `core_ext` dir or similar to make it clearer that monkeypatching is happening.
+
+    * __DONE__ `ArchiveAPI` directory structure conflicts with internal structure.
+
+    * __DONE__ `TidyBytes` is referred to internally as `TibyBytes`.
+
+    * __DONE__ `ArchiveAPI` capitalization?
