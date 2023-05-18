@@ -6,6 +6,7 @@ require 'open-uri'
 require 'fileutils'
 require 'cgi'
 require 'json'
+require 'yaml'
 require 'logger'
 require_relative 'core_ext/string'
 require_relative 'wayback_machine_downloader/version'
@@ -132,6 +133,8 @@ class WaybackMachineDownloader
     end
   end
 
+  # Prints list of available files to $stdout.
+  # @return [Array<Hash>]
   def list_files
     # retrieval produces its own output
     @orig_stdout = $stdout
@@ -144,6 +147,7 @@ class WaybackMachineDownloader
     end
     logger.info files[-1].to_json
     logger.info "]"
+    return files
   end
 
   def download_files
@@ -263,7 +267,17 @@ class WaybackMachineDownloader
   end
 
   def file_list_by_timestamp
-    @file_list_by_timestamp ||= get_file_list_by_timestamp
+    if !@file_list_by_timestamp
+      @file_list_by_timestamp = get_file_list_by_timestamp
+      filename = file_list_path
+      FileUtils.mkdir_p(File.dirname(filename))
+      File.write(filename, @file_list_by_timestamp.to_yaml)
+    end
+    return @file_list_by_timestamp
+  end
+
+  def file_list_path
+    File.join (@directory || 'websites'), "#{backup_name}_file_list.yml"
   end
 
   def semaphore
