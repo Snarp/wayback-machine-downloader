@@ -1,16 +1,14 @@
 # TODO (SNARP'S)
 
+- Test recent changes!
+
 - Privatize methods that don't need to be public
 
-- References to local directory structure need to use `File.join` rather than string concatenation.
+- __PARTLY DONE__ References to local directory structure need to use `File.join` rather than string concatenation.
 
 - Yardoc documentation.
 
 - Restructure main class for readability.
-
-- Add ability to save file list locally instead of just dumping to console.
-
-    * Should probably be caching it in directory by default?
 
 - Ruby 3 compatibility.
 
@@ -18,9 +16,7 @@
 
 - Logging:
 
-    * Currently uses `puts` only; switch to `Logger`/`SemanticLogger`/something
-
-    * Add ability to write log to file.
+    * Probably silence Logger in testing.
 
     * Add ability to mute large numbers of repetitive messages encountered when using filters.
 
@@ -100,6 +96,12 @@
 
 ## DONE
 
+- __PARTLY DONE__ References to local directory structure need to use `File.join` rather than string concatenation.
+
+- __DONE via cache_lists + filename args__ Add ability to save file list locally instead of just dumping to console.
+
+    * __DONE__ Should probably be caching it in directory by default?
+
 - Helper module structure:
 
     * __DONE__ `ToRegex` and `TidyBytes` should be probably moved to a `core_ext` dir or similar to make it clearer that monkeypatching is happening.
@@ -109,3 +111,9 @@
     * __DONE__ `TidyBytes` is referred to internally as `TibyBytes`.
 
     * __DONE__ `ArchiveAPI` capitalization?
+
+- Logging:
+
+    * __DONE__ Currently uses `puts` only; switch to `Logger`/`SemanticLogger`/something
+
+    * __DONE if you customize 'logger' arg__ Add ability to write log to file.

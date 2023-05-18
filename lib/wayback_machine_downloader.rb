@@ -20,7 +20,7 @@ class WaybackMachineDownloader
   attr_accessor :base_url, :exact_url, :directory, :all_timestamps,
     :from_timestamp, :to_timestamp, :only_filter, :exclude_filter, 
     :all, :maximum_pages, :threads_count, 
-    :logger
+    :cache_lists, :logger
 
   # @param [String]          base_url:       nil     Base url of the website you want to retrieve as a parameter (e.g., `http://example.com`)
   # @param [String]          directory:      nil     Directory to save the downloaded files into. Default is `./websites/` plus the domain name
@@ -34,6 +34,8 @@ class WaybackMachineDownloader
   # @param [TrueClass]       list:           false   Only list file urls in a JSON format with the archived timestamps, won't download anything
   # @param [Integer]         maximum_pages:  100     Maximum snapshot pages to consider
   # @param [Integer]         threads_count:  1       Number of files to download at a time (ie. 20)
+  # @param [TrueClass]       cache_lists:    true    Whether to save local copies of fetched file lists
+  # @param [Logger]          logger:         Logger.new(STDOUT)
   # @param [Hash]            **ignored_args
   def initialize(base_url:       nil, 
                  directory:      nil, 
@@ -47,6 +49,7 @@ class WaybackMachineDownloader
                  list:           false, 
                  maximum_pages:  100, 
                  threads_count:  1, 
+                 cache_lists:    true, 
                  logger:         Logger.new(STDOUT), 
                  **ignored_args)
     @base_url,@directory=base_url,directory
@@ -54,7 +57,7 @@ class WaybackMachineDownloader
     @only_filter,@exclude_filter=only_filter,exclude_filter
     @all,@all_timestamps,@exact_url,@list=all,all_timestamps,exact_url,list
     @maximum_pages,@threads_count=maximum_pages,threads_count
-    @logger=logger
+    @cache_lists,@logger=cache_lists,logger
   end
 
   def backup_name
@@ -69,7 +72,7 @@ class WaybackMachineDownloader
     @directory || File.join('websites', backup_name)
   end
 
-  def get_all_snapshots_to_consider
+  def get_all_snapshots_to_consider(cache: @cache_lists)
     # Note: Passing a page index parameter allow us to get more snapshots,
     # but from a less fresh index
     logger.info "Getting snapshot pages..."
@@ -86,10 +89,11 @@ class WaybackMachineDownloader
     end
     logger.info "Found #{snapshot_list_to_consider.length} snaphots to consider."
     puts
+    cache_list('snapshot_list_to_consider', snapshot_list_to_consider) if cache
     snapshot_list_to_consider
   end
 
-  def get_file_list_all_timestamps
+  def get_file_list_all_timestamps(cache: @cache_lists)
     file_list_curated = Hash.new
     get_all_snapshots_to_consider.each do |file_timestamp, file_url|
       next if !file_url.include?('/')
@@ -112,12 +116,12 @@ class WaybackMachineDownloader
       end
     end
     logger.info "file_list_curated: " + file_list_curated.count.to_s
+    cache_list('file_list_curated', file_list_curated) if cache
     file_list_curated
   end
 
-
-  def get_file_list_by_timestamp
-    if @all_timestamps
+  def get_file_list_by_timestamp(cache: @cache_lists)
+    @file_list_by_timestamp = if @all_timestamps
       file_list_curated = get_file_list_all_timestamps
       file_list_curated.map do |file_remote_info|
         file_remote_info[1][:file_id] = file_remote_info[0]
@@ -131,15 +135,24 @@ class WaybackMachineDownloader
         file_remote_info[1]
       end
     end
+    cache_list('file_list_by_timestamp', @file_list_by_timestamp) if cache
+    return @file_list_by_timestamp
   end
 
-  # Prints list of available files to $stdout.
+  # Prints JSON-formatted list of available files to $stdout and (optionally) a local file.
+  # @param [String] filename
+  # @param [TrueClass] cache: @cache_lists
   # @return [Array<Hash>]
-  def list_files
+  def list_files(filename=nil, cache: @cache_lists)
     # retrieval produces its own output
     @orig_stdout = $stdout
     $stdout = $stderr
-    files = get_file_list_by_timestamp
+    files = file_list_by_timestamp
+    if filename || cache
+      filename ||= get_list_filename('file_list_by_timestamp', '.json')
+      FileUtils.mkdir_p(File.dirname(filename))
+      File.write(filename, files.to_json)
+    end
     $stdout = @orig_stdout
     logger.info "["
     files[0...-1].each do |file|
@@ -267,20 +280,28 @@ class WaybackMachineDownloader
   end
 
   def file_list_by_timestamp
-    if !@file_list_by_timestamp
-      @file_list_by_timestamp = get_file_list_by_timestamp
-      filename = file_list_path
-      FileUtils.mkdir_p(File.dirname(filename))
-      File.write(filename, @file_list_by_timestamp.to_yaml)
-    end
-    return @file_list_by_timestamp
-  end
-
-  def file_list_path
-    File.join (@directory || 'websites'), "#{backup_name}_file_list.yml"
+    @file_list_by_timestamp || get_file_list_by_timestamp
   end
 
   def semaphore
     @semaphore ||= Mutex.new
+  end
+
+  # METADATA / FILE LIST CACHING
+
+  def cache_list(name, data)
+    filename = get_list_filename(name)
+    FileUtils.mkdir_p(File.dirname(filename))
+    File.write(filename, data.to_yaml)
+  end
+
+  def load_list(name)
+    if File.exist?(filename = get_list_filename(name))
+      YAML::load(File.read(filename))
+    end
+  end
+
+  def get_list_filename(name, ext='.yml')
+    File.join (@directory || 'websites'), "#{backup_name}_#{name}#{ext}"
   end
 end
