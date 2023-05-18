@@ -6,32 +6,98 @@
 
 - Add ability to save file list locally instead of just dumping to console.
 
-  * Should probably be caching it in directory by default?
+    * Should probably be caching it in directory by default?
 
 - Ruby 3 compatibility.
 
 - Logging:
 
-  * Currently uses 'puts' only; switch to Logger/SemanticLogger/something
+    * Currently uses 'puts' only; switch to `Logger`/`SemanticLogger`/something
 
-  * Add ability to write to file
+    * Add ability to write log to file.
 
-  * Add ability to mute large numbers of repetitive messages encountered when using filters
+    * Add ability to mute large numbers of repetitive messages encountered when using filters.
 
 - Filtering:
 
-  * Add ability to pass and store `:only_filter` and `:exclude_filter` as Regex. They can presently can only be Strings, get converted to Regex each time they're used.
+    * Add ability to pass and store `:only_filter` and `:exclude_filter` as Regex. They can presently can only be Strings, get converted to Regex each time they're used.
 
-  * String filters use 'include?' - should probably be a 'starts_with?' option or something for specific subdirs.
+    * String filters use `include?` - should probably be a `starts_with?` option or something for specific subdirs.
 
-  * Option for extension/filetype-specific filtering?
+    * Option for extension/filetype-specific filtering?
 
 - Helper module structure:
 
-  * ToRegex and TidyBytes should be probably moved to a `core_ext` dir or similar to make it clearer that monkeypatching is happening.
+    * `ToRegex` and `TidyBytes` should be probably moved to a `core_ext` dir or similar to make it clearer that monkeypatching is happening.
 
-  * ArchiveAPI and TidyBytes directory structure conflicts with internal structure.
+    * `ArchiveAPI` directory structure conflicts with internal structure.
 
-  * TidyBytes is referred to internally as TibyBytes.
+    * `TidyBytes` is referred to internally as `TibyBytes`.
 
-  * ArchiveAPI capitalization?
+    * `ArchiveAPI` capitalization?
+
+- Testing:
+  
+    * Travis not being run; URLs etc out-of-date.
+
+    * Test suite is too rigid, fails out-of-the-box:
+
+        ```
+        $ bundle exec rake test
+        Run options: --seed 36188
+
+        # Running:
+
+        .F....FFF.FF...F....
+
+        Finished in 102.103800s, 0.1959 runs/s, 0.1861 assertions/s.
+
+          1) Failure:
+        WaybackMachineDownloaderTest#test_all_timestamps_being_respected [wayback-machine-downloader/test/test_wayback_machine_downloader.rb:90]:
+        Expected: 68
+          Actual: 69
+
+          2) Failure:
+        WaybackMachineDownloaderTest#test_file_list_exclude_filter_without_matches [wayback-machine-downloader/test/test_wayback_machine_downloader.rb:69]:
+        Expected: 68
+          Actual: 69
+
+          3) Failure:
+        WaybackMachineDownloaderTest#test_all_get_file_list_curated_size [wayback-machine-downloader/test/test_wayback_machine_downloader.rb:106]:
+        Expected: 69
+          Actual: 75
+
+          4) Failure:
+        WaybackMachineDownloaderTest#test_file_list_curated [wayback-machine-downloader/test/test_wayback_machine_downloader.rb:30]:
+        Expected: 20060711191226
+          Actual: "20060711191226"
+
+          5) Failure:
+        WaybackMachineDownloaderTest#test_file_list_exclude_filter_with_1_match [wayback-machine-downloader/test/test_wayback_machine_downloader.rb:74]:
+        Expected: 67
+          Actual: 68
+
+          6) Failure:
+        WaybackMachineDownloaderTest#test_file_list_by_timestamp [wayback-machine-downloader/test/test_wayback_machine_downloader.rb:39]:
+        --- expected
+        +++ actual
+        @@ -1 +1 @@
+        -{:file_url=>"http://www.onlyfreegames.net:80/strat.html", :timestamp=>20060111084756, :file_id=>"strat.html"}
+        +{:file_url=>"http://www.onlyfreegames.net:80/arcade.htm", :timestamp=>"20060111094201", :file_id=>"arcade.htm"}
+
+
+          7) Failure:
+        WaybackMachineDownloaderTest#test_file_list_exclude_filter_with_a_regex [wayback-machine-downloader/test/test_wayback_machine_downloader.rb:79]:
+        Expected: 31
+          Actual: 32
+
+        20 runs, 19 assertions, 7 failures, 0 errors, 0 skips
+        rake aborted!
+        Command failed with status (1): [ruby -I"lib:test" -I"~/.rbenv/versions/2.6.0-dev/lib/ruby/gems/2.6.0/gems/rake-10.5.0/lib" "~/.rbenv/versions/2.6.0-dev/lib/ruby/gems/2.6.0/gems/rake-10.5.0/lib/rake/rake_test_loader.rb" "test/test*.rb" ]
+        ~/.rbenv/versions/2.6.0-dev/bin/bundle:23:in `load'
+        ~/.rbenv/versions/2.6.0-dev/bin/bundle:23:in `<main>'
+        Tasks: TOP => test
+        (See full trace by running task with --trace)
+        ```
+
+    

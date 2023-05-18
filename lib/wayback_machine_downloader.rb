@@ -14,24 +14,39 @@ class WaybackMachineDownloader
 
   include ArchiveAPI
 
-  VERSION = "2.3.1"
+  VERSION = "2.3.2"
 
   attr_accessor :base_url, :exact_url, :directory, :all_timestamps,
     :from_timestamp, :to_timestamp, :only_filter, :exclude_filter, 
     :all, :maximum_pages, :threads_count
 
-  def initialize params
-    @base_url = params[:base_url]
-    @exact_url = params[:exact_url]
-    @directory = params[:directory]
-    @all_timestamps = params[:all_timestamps]
-    @from_timestamp = params[:from_timestamp].to_i
-    @to_timestamp = params[:to_timestamp].to_i
-    @only_filter = params[:only_filter]
-    @exclude_filter = params[:exclude_filter]
-    @all = params[:all]
-    @maximum_pages = params[:maximum_pages] ? params[:maximum_pages].to_i : 100
-    @threads_count = params[:threads_count].to_i
+  # @param [String]          base_url:       nil
+  # @param [TrueClass]       exact_url:      false
+  # @param [String]          directory:      nil
+  # @param [TrueClass]       all_timestamps: false
+  # @param [String,Numeric]  from_timestamp: nil
+  # @param [String,Numeric]  to_timestamp:   nil
+  # @param [String]          only_filter:    nil
+  # @param [String]          exclude_filter: nil
+  # @param [TrueClass]       all:            false
+  # @param [Integer]         maximum_pages:  100
+  # @param [Integer]         threads_count:  1
+  # @param [TrueClass]       list:           false
+  # @param [Hash]            **ignored_args
+  def initialize(base_url:       nil, 
+                 exact_url:      false, 
+                 directory:      nil, 
+                 all_timestamps: false, 
+                 from_timestamp: nil, 
+                 to_timestamp:   nil, 
+                 only_filter:    nil, 
+                 exclude_filter: nil, 
+                 all:            false, 
+                 maximum_pages:  100, 
+                 threads_count:  1, 
+                 list:           false, 
+                 **ignored_args)
+    @base_url,@exact_url,@directory,@all_timestamps,@from_timestamp,@to_timestamp,@only_filter,@exclude_filter,@all,@maximum_pages,@threads_count,@list=base_url,exact_url,directory,all_timestamps,from_timestamp,to_timestamp,only_filter,exclude_filter,all,maximum_pages,threads_count,list
   end
 
   def backup_name

@@ -8,6 +8,8 @@ websites
 .DS_Store
 .rake_tasks~
 /tmp/
+TODO.html
+README.html
 
 ## BUNDLER
 *.gem
