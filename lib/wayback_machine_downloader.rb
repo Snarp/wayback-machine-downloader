@@ -6,46 +6,54 @@ require 'open-uri'
 require 'fileutils'
 require 'cgi'
 require 'json'
+require 'logger'
 require_relative 'core_ext/string'
+require_relative 'wayback_machine_downloader/version'
 require_relative 'wayback_machine_downloader/archive_api'
+require_relative 'wayback_machine_downloader/filtering_tools'
 
 class WaybackMachineDownloader
-
   include ArchiveApi
-
-  VERSION = "2.3.2"
+  include FilteringTools
 
   attr_accessor :base_url, :exact_url, :directory, :all_timestamps,
     :from_timestamp, :to_timestamp, :only_filter, :exclude_filter, 
-    :all, :maximum_pages, :threads_count
+    :all, :maximum_pages, :threads_count, 
+    :logger
 
   # @param [String]          base_url:       nil     Base url of the website you want to retrieve as a parameter (e.g., `http://example.com`)
-  # @param [TrueClass]       exact_url:      false   Download only the url provided and not the full site
   # @param [String]          directory:      nil     Directory to save the downloaded files into. Default is `./websites/` plus the domain name
-  # @param [TrueClass]       all_timestamps: false   Download all snapshots/timestamps for a given website
   # @param [String,Numeric]  from_timestamp: nil     Only files on or after timestamp supplied (ie. 20060716231334)
   # @param [String,Numeric]  to_timestamp:   nil     Only files on or before timestamp supplied (ie. 20100916231334)
   # @param [String,Regex]    only_filter:    nil     Restrict downloading to urls that include given string/match given regex
-  # @param [String]          exclude_filter: nil     Skip urls that include given string/match given regex
+  # @param [String,Regex]    exclude_filter: nil     Skip urls that include given substring/match given regex
   # @param [TrueClass]       all:            false   Expand downloading to error files (40x and 50x) and redirections (30x)
+  # @param [TrueClass]       all_timestamps: false   Download all snapshots/timestamps for a given website
+  # @param [TrueClass]       exact_url:      false   Download only the url provided and not the full site
+  # @param [TrueClass]       list:           false   Only list file urls in a JSON format with the archived timestamps, won't download anything
   # @param [Integer]         maximum_pages:  100     Maximum snapshot pages to consider
   # @param [Integer]         threads_count:  1       Number of files to download at a time (ie. 20)
-  # @param [TrueClass]       list:           false   Only list file urls in a JSON format with the archived timestamps, won't download anything
   # @param [Hash]            **ignored_args
   def initialize(base_url:       nil, 
-                 exact_url:      false, 
                  directory:      nil, 
-                 all_timestamps: false, 
                  from_timestamp: nil, 
                  to_timestamp:   nil, 
                  only_filter:    nil, 
                  exclude_filter: nil, 
                  all:            false, 
+                 all_timestamps: false, 
+                 exact_url:      false, 
+                 list:           false, 
                  maximum_pages:  100, 
                  threads_count:  1, 
-                 list:           false, 
+                 logger:         Logger.new(STDOUT), 
                  **ignored_args)
-    @base_url,@exact_url,@directory,@all_timestamps,@from_timestamp,@to_timestamp,@only_filter,@exclude_filter,@all,@maximum_pages,@threads_count,@list=base_url,exact_url,directory,all_timestamps,from_timestamp,to_timestamp,only_filter,exclude_filter,all,maximum_pages,threads_count,list
+    @base_url,@directory=base_url,directory
+    @from_timestamp,@to_timestamp=from_timestamp,to_timestamp
+    @only_filter,@exclude_filter=only_filter,exclude_filter
+    @all,@all_timestamps,@exact_url,@list=all,all_timestamps,exact_url,list
+    @maximum_pages,@threads_count=maximum_pages,threads_count
+    @logger=logger
   end
 
   def backup_name
@@ -68,32 +76,6 @@ class WaybackMachineDownloader
     end
   end
 
-  def match_only_filter file_url
-    if @only_filter
-      only_filter_regex = @only_filter.to_regex
-      if only_filter_regex
-        only_filter_regex =~ file_url
-      else
-        file_url.downcase.include? @only_filter.downcase
-      end
-    else
-      true
-    end
-  end
-
-  def match_exclude_filter file_url
-    if @exclude_filter
-      exclude_filter_regex = @exclude_filter.to_regex
-      if exclude_filter_regex
-        exclude_filter_regex =~ file_url
-      else
-        file_url.downcase.include? @exclude_filter.downcase
-      end
-    else
-      false
-    end
-  end
-
   def get_all_snapshots_to_consider
     # Note: Passing a page index parameter allow us to get more snapshots,
     # but from a less fresh index
@@ -112,32 +94,6 @@ class WaybackMachineDownloader
     puts " found #{snapshot_list_to_consider.length} snaphots to consider."
     puts
     snapshot_list_to_consider
-  end
-
-  def get_file_list_curated
-    file_list_curated = Hash.new
-    get_all_snapshots_to_consider.each do |file_timestamp, file_url|
-      next unless file_url.include?('/')
-      file_id = file_url.split('/')[3..-1].join('/')
-      file_id = CGI::unescape file_id 
-      file_id = file_id.tidy_bytes unless file_id == ""
-      if file_id.nil?
-        puts "Malformed file url, ignoring: #{file_url}"
-      else
-        if match_exclude_filter(file_url)
-          puts "File url matches exclude filter, ignoring: #{file_url}"
-        elsif not match_only_filter(file_url)
-          puts "File url doesn't match only filter, ignoring: #{file_url}"
-        elsif file_list_curated[file_id]
-          unless file_list_curated[file_id][:timestamp] > file_timestamp
-            file_list_curated[file_id] = {file_url: file_url, timestamp: file_timestamp}
-          end
-        else
-          file_list_curated[file_id] = {file_url: file_url, timestamp: file_timestamp}
-        end
-      end
-    end
-    file_list_curated
   end
 
   def get_file_list_all_timestamps

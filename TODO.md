@@ -1,5 +1,7 @@
 # TODO (SNARP'S)
 
+- Privatize methods that don't need to be public
+
 - References to local directory structure need to use `File.join` rather than string concatenation.
 
 - Yardoc documentation.
