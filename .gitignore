@@ -7,6 +7,7 @@ log
 websites
 .DS_Store
 .rake_tasks~
+/tmp/
 
 ## BUNDLER
 *.gem
