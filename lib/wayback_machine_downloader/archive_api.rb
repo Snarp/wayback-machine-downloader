@@ -4,7 +4,10 @@ require 'uri'
 class WaybackMachineDownloader
   module ArchiveApi
 
-    def get_raw_list_from_api url, page_index
+    # @param [String] url
+    # @param [Integer] page_index
+    # @return [Array<Array>] [["20100730171721", "http://www.site.com/"], ...]
+    def get_raw_list_from_api url, page_index=nil
       request_url = URI("https://web.archive.org/cdx/search/xd")
       params = [["output", "json"], ["url", url]]
       params += parameters_for_api page_index
@@ -21,6 +24,8 @@ class WaybackMachineDownloader
       end
     end
 
+    # @param [Integer] page_index
+    # @return [Array<Array>]
     def parameters_for_api page_index
       parameters = [["fl", "timestamp,original"], ["collapse", "digest"], ["gzip", "false"]]
       if !@all

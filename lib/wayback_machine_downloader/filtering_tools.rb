@@ -1,6 +1,8 @@
 class WaybackMachineDownloader
   module FilteringTools
 
+    # @param [String] file_url 
+    # @return [TrueClass]
     def match_only_filter file_url
       if @only_filter
         only_filter_regex = @only_filter.to_regex
@@ -14,6 +16,8 @@ class WaybackMachineDownloader
       end
     end
 
+    # @param [String] file_url 
+    # @return [TrueClass]
     def match_exclude_filter file_url
       if @exclude_filter
         exclude_filter_regex = @exclude_filter.to_regex
@@ -27,7 +31,9 @@ class WaybackMachineDownloader
       end
     end
 
-    def get_file_list_curated
+    # @param [TrueClass] cache: @cache_lists
+    # @return [Hash]   ex: { 'dirname/index.html' => { file_url: 'http://...', timestamp: '20090708105630' } }
+    def get_file_list_curated(cache: @cache_lists)
       file_list_curated = Hash.new
       get_all_snapshots_to_consider.each do |file_timestamp, file_url|
         next unless file_url.include?('/')
@@ -50,6 +56,7 @@ class WaybackMachineDownloader
           end
         end
       end
+      cache_list('file_list_curated', file_list_curated) if cache
       file_list_curated
     end
     
