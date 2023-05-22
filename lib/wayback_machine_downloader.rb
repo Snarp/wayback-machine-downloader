@@ -183,7 +183,7 @@ class WaybackMachineDownloader
 
     threads = []
     @processed_file_count = 0
-    @threads_count = 1 unless @threads_count != 0
+    @threads_count = 1 if @threads_count<=0
     @threads_count.times do
       threads << Thread.new do
         until file_queue.empty?
@@ -265,12 +265,12 @@ class WaybackMachineDownloader
       end
       semaphore.synchronize do
         @processed_file_count += 1
-        logger.info "#{file_url} -> #{local_path} (#{@processed_file_count}/#{file_list_by_timestamp.size})"
+        logger.info "(#{@processed_file_count}/#{file_list_by_timestamp.size}) #{file_url} -> #{local_path}"
       end
     else # if File.exist?(local_path)
       semaphore.synchronize do
         @processed_file_count += 1
-        logger.warn "#{file_url} # #{local_path} already exists. (#{@processed_file_count}/#{file_list_by_timestamp.size})"
+        logger.warn "(#{@processed_file_count}/#{file_list_by_timestamp.size}) #{file_url} # #{local_path} already exists."
       end
     end
   end
