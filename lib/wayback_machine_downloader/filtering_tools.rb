@@ -5,7 +5,12 @@ class WaybackMachineDownloader
     # @return [TrueClass]
     def match_only_filter file_url
       if @only_filter
-        only_filter_regex = @only_filter.to_regex
+        only_filter_regex = if !@only_filter.is_a?(Regexp)
+          @only_filter.to_regex
+        else
+          @only_filter
+        end
+        # only_filter_regex = @only_filter.to_regex
         if only_filter_regex
           only_filter_regex =~ file_url
         else
@@ -20,7 +25,12 @@ class WaybackMachineDownloader
     # @return [TrueClass]
     def match_exclude_filter file_url
       if @exclude_filter
-        exclude_filter_regex = @exclude_filter.to_regex
+        exclude_filter_regex = if !@exclude_filter.is_a?(Regexp)
+          @exclude_filter.to_regex
+        else
+          @exclude_filter
+        end
+        # exclude_filter_regex = @exclude_filter.to_regex
         if exclude_filter_regex
           exclude_filter_regex =~ file_url
         else
